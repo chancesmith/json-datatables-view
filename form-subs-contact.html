@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- styles -->
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css" rel="stylesheet">
+	<style> 
+		body {font-size: 17px;}
+		body, h1, .wrapper {padding-top: 40px;clear: both;}
+	</style>
+
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+	<!-- scripts -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+
+</head>
+<body>
+<div class="container">
+	<a href="#" id="back-link" class="btn btn-default btn-sm pull-left">Go Back</a>
+</div>
+
+<div class="container">
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2 text-center">
+			<h1 id="title"></h1>
+			<p id="description"></p>
+			
+		</div>
+    <div class="wrapper">
+    	<div class="col-md-12">
+				<table id="excelDataTable" class="table table-hover">
+				</table>
+			</div>
+    </div>
+	</div>
+</div> <!-- /container -->
+<script>
+
+// variables to edit ***
+var file = ".form-subs-contact.json",
+		title = "Contact Form Subsmissions",
+		description = "Here are all those who have submitted Butts Foods' contact form...",
+		backLink = "/submissions/",
+		backLinkTxt = '<i class="fa fa-chevron-left"></i>&nbsp; Back to Submissions';
+
+// update page with content from variables
+$('title').text(title);
+$('#title').text(title);
+$('#description').text(description);
+$('a#back-link').attr('href', backLink).html(backLinkTxt);
+
+// AJAX for json file
+var myList = [];
+$.getJSON( file, function( data ) {
+  myList = data;
+  buildHtmlTable('#excelDataTable');
+  $('#excelDataTable').DataTable();
+});
+
+/////
+// show data
+/////
+// Builds the HTML Table out of myList.
+function buildHtmlTable(selector) {
+	var columns = addAllColumnHeaders(myList, selector);
+
+	for (var i = 0 ; i < myList.length ; i++) {
+		var row$ = $('<tr/>');
+		for (var colIndex = 0 ; colIndex < columns.length ; colIndex++) {
+			var cellValue = myList[i][columns[colIndex]];
+
+			if (cellValue == null) { cellValue = ""; }
+
+			row$.append($('<td/>').html(cellValue));
+		}
+		$(selector).append(row$);
+	}
+
+	$( "#excelDataTable thead th" ).wrapAll( "<tr/>");
+	$('#excelDataTable').DataTable({
+		paging: false
+	});
+}
+
+// Adds a header row to the table and returns the set of columns.
+// Need to do union of keys from all records as some records may not contain
+// all records
+function addAllColumnHeaders(myList, selector){
+  var columnSet = [];
+  var headerTr$ = $('<thead/>');
+
+  for (var i = 0 ; i < myList.length ; i++) {
+      var rowHash = myList[i];
+      for (var key in rowHash) {
+          if ($.inArray(key, columnSet) == -1){
+              columnSet.push(key);
+              headerTr$.append($('<th/>').html(key));
+          }
+      }
+  }
+  $(selector).append(headerTr$);
+
+  return columnSet;
+}
+
+</script>
+</body>
+</html>
